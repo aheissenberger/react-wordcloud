@@ -1,6 +1,7 @@
 import { select } from 'd3-selection';
+import debounce from 'lodash.debounce';
 import { useEffect, useRef, useState } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
+//import ResizeObserver from 'resize-observer-polyfill';
 
 export function useResponsiveSvgSelection(minSize, initialSize, svgAttributes) {
   const elementRef = useRef();
@@ -47,20 +48,23 @@ export function useResponsiveSvgSelection(minSize, initialSize, svgAttributes) {
 
     // Update resize using a resize observer
     const resizeObserver = new ResizeObserver(entries => {
-      if (!entries || entries.length === 0) {
-        return;
-      }
+      requestAnimationFrame(() => {
+        if (!entries || entries.length === 0) {
+          return;
+        }
 
-      if (initialSize === undefined) {
-        const { width, height } = entries[0].contentRect;
-        updateSize(width, height);
-      }
+        if (initialSize === undefined) {
+          const { width, height } = entries[0].contentRect;
+            const debouncedUpdateSize = debounce(() => updateSize(width, height), 100);
+            debouncedUpdateSize();
+        }
+      });
     });
     resizeObserver.observe(element);
 
     // Cleanup
     return () => {
-      resizeObserver.unobserve(element);
+      resizeObserver.disconnect();
       select(element)
         .selectAll('*')
         .remove();
