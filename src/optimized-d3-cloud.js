@@ -128,7 +128,7 @@ export default function Cloud() {
   function getContext(canvas) {
     canvas.width = canvas.height = 1;
     const ratio = Math.sqrt(
-      canvas.getContext('2d').getImageData(0, 0, 1, 1).data.length >> 2,
+      canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, 1, 1).data.length >> 2,
     );
     canvas.width = (cw << 5) / ratio;
     canvas.height = ch / ratio;
